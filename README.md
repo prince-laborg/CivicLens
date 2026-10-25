@@ -34,7 +34,8 @@ Citizens authenticate via OTP (SMS) and can track their complaints in real-time.
 
 ## Live Demo
 
-> **Production URL:** [https://dpsfubu0rsyo3.cloudfront.net](https://dpsfubu0rsyo3.cloudfront.net)
+> **Production URL:**
+
 
 **Quick Login:** Enter any name, any 10-digit phone number, and use OTP `123456` to log in.
 
