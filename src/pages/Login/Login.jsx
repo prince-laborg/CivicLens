@@ -42,7 +42,7 @@ const Login = ({ onLogin }) => {
             if (res.success) {
                 // Token is stored in localStorage by the api.js verifyOtp function
                 const userData = { ...res.user, name, phone: '+91' + phone, role: selectedRole };
-                localStorage.setItem('civicai_user', JSON.stringify(userData));
+                localStorage.setItem('CivicLens_user', JSON.stringify(userData));
                 onLogin(userData);
                 if (selectedRole === 'citizen') navigate('/');
                 else if (selectedRole === 'admin') navigate('/dashboard');
@@ -64,7 +64,7 @@ const Login = ({ onLogin }) => {
                         alt="Emblem of India"
                         className="login-emblem-img"
                     />
-                    <h1>CivicAI</h1>
+                    <h1>CivicLens</h1>
                     <p className="text-muted">Smart Municipal Complaint System</p>
                     <p className="login-gov-tag">Government of India · Smart City Mission</p>
                 </div>

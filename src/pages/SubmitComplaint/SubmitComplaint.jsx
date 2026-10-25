@@ -80,7 +80,7 @@ const SubmitComplaint = () => {
         setSubmitting(true);
         setError(null);
         try {
-            const savedUser = JSON.parse(localStorage.getItem('civicai_user') || '{}');
+            const savedUser = JSON.parse(localStorage.getItem('CivicLens_user') || '{}');
             const res = await submitComplaint({
                 analysis,
                 userNote,

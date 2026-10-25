@@ -1,5 +1,5 @@
 """
-department_mapper.py — Category-to-department mapper for CivicAI Lambda.
+department_mapper.py — Category-to-department mapper for CivicLens Lambda.
 
 Maps detected issue categories to the responsible municipal department.
 """

@@ -1,5 +1,5 @@
 /**
- * api.js — CivicAI Frontend API Service Layer.
+ * api.js — CivicLens Frontend API Service Layer.
  *
  * Every function calls the real backend API via apiClient.
  * If the API is unreachable, each function falls back to mock data
@@ -31,7 +31,7 @@ export async function verifyOtp(phone, otp) {
     try {
         const res = await api.post('/auth/verify-otp', { phone, otp });
         if (res.token) {
-            localStorage.setItem('civicai_token', res.token);
+            localStorage.setItem('CivicLens_token', res.token);
         }
         return res;
     } catch (err) {

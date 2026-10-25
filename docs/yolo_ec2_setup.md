@@ -1,6 +1,6 @@
-*# CivicAI — AWS Deployment Guide (EC2-First)
+*# CivicLens — AWS Deployment Guide (EC2-First)
 
-Step-by-step guide to deploy the entire CivicAI system on AWS, **starting from EC2 instance setup**.
+Step-by-step guide to deploy the entire CivicLens system on AWS, **starting from EC2 instance setup**.
 
 > **Region**: Use **`ap-south-1`** (Mumbai) for all services.
 
@@ -11,7 +11,7 @@ Step-by-step guide to deploy the entire CivicAI system on AWS, **starting from E
 ```
 ┌──────────┐     ┌─────────────┐     ┌───────────┐     ┌─────────────────┐
 │ Frontend │────▶│ API Gateway │────▶│ Lambda 1  │────▶│  S3 Bucket      │
-│ (React)  │     │ /upload/    │     │ presign   │     │  civicai-images  │
+│ (React)  │     │ /upload/    │     │ presign   │     │  CivicLens-images  │
 └──────────┘     │  presign    │     │ URL       │     └────────┬────────┘
                  └─────────────┘     └───────────┘              │
                                                          S3 Event Trigger
@@ -33,7 +33,7 @@ Step-by-step guide to deploy the entire CivicAI system on AWS, **starting from E
 
 ## Pre-requisites
 
-- [x] **Trained YOLO model** — `runs/detect/civicai-gpu/weights/best.pt` (6.3 MB)
+- [x] **Trained YOLO model** — `runs/detect/CivicLens-gpu/weights/best.pt` (6.3 MB)
 - [ ] **AWS Account** with free tier or billing enabled
 - [ ] AWS Console access at [console.aws.amazon.com](https://console.aws.amazon.com)
 
@@ -48,10 +48,10 @@ Step-by-step guide to deploy the entire CivicAI system on AWS, **starting from E
 
    | Setting | Value |
    |---|---|
-   | Name | `civicai-yolo-server` |
+   | Name | `CivicLens-yolo-server` |
    | AMI | **Amazon Linux 2023** (free-tier eligible) |
    | Instance type | `t3.medium` (2 vCPU, 4 GB RAM — minimum for YOLO) |
-   | Key pair | Click **Create new key pair** → name: `civicai-key` → Type: RSA → Format: `.pem` → **Create** |
+   | Key pair | Click **Create new key pair** → name: `CivicLens-key` → Type: RSA → Format: `.pem` → **Create** |
    | Storage | 20 GB, gp3 |
 
 3. **Network settings** → Click **Edit** → **Create security group**:
@@ -70,14 +70,14 @@ Step-by-step guide to deploy the entire CivicAI system on AWS, **starting from E
 
 1. Go to **EC2** → **Elastic IPs** → **Allocate Elastic IP address** → **Allocate**
 2. Select the new Elastic IP → **Actions** → **Associate Elastic IP address**
-3. Choose your `civicai-yolo-server` instance → **Associate**
+3. Choose your `CivicLens-yolo-server` instance → **Associate**
 4. **Note this IP** — you'll use it everywhere as `<EC2_IP>`
 
 ### 1.3 — SSH Into Your Instance
 
 ```bash
 # On your local machine (PowerShell or Git Bash)
-ssh -i civicai-key.pem ec2-user@<EC2_IP>
+ssh -i CivicLens-key.pem ec2-user@<EC2_IP>
 ```
 
 > If you get a permission error on Windows, right-click the .pem file → Properties → Security → Edit → remove all users except your own.
@@ -101,10 +101,10 @@ Open a **new terminal** on your local machine:
 
 ```bash
 # Create directory on EC2
-ssh -i civicai-key.pem ec2-user@<EC2_IP> "mkdir -p /home/ec2-user/civicai/model"
+ssh -i CivicLens-key.pem ec2-user@<EC2_IP> "mkdir -p /home/ec2-user/CivicLens/model"
 
-# Copy trained model (run from civicai-frontend directory)
-scp -i civicai-key.pem runs/detect/civicai-gpu/weights/best.pt ec2-user@<EC2_IP>:/home/ec2-user/civicai/model/best.pt
+# Copy trained model (run from CivicLens-frontend directory)
+scp -i CivicLens-key.pem runs/detect/CivicLens-gpu/weights/best.pt ec2-user@<EC2_IP>:/home/ec2-user/CivicLens/model/best.pt
 ```
 
 ### 1.6 — Create the Prediction Server
@@ -112,14 +112,14 @@ scp -i civicai-key.pem runs/detect/civicai-gpu/weights/best.pt ec2-user@<EC2_IP>
 Back in your **SSH terminal** on EC2:
 
 ```bash
-cd /home/ec2-user/civicai
+cd /home/ec2-user/CivicLens
 cat > predict_server.py << 'EOF'
 """
-CivicAI YOLO Inference Server
+CivicLens YOLO Inference Server
 FastAPI microservice for classifying civic infrastructure issues.
 
 Endpoint: POST /predict
-Input:  { "bucket": "civicai-images", "key": "complaints/uuid.jpg" }
+Input:  { "bucket": "CivicLens-images", "key": "complaints/uuid.jpg" }
 Output: { "category": "pothole", "confidence": 0.92 }
 """
 
@@ -137,7 +137,7 @@ MODEL_PATH = "model/best.pt"
 REGION = "ap-south-1"
 
 # ── Initialize ───────────────────────────────────────────────────────────────
-app = FastAPI(title="CivicAI YOLO Inference", version="1.0")
+app = FastAPI(title="CivicLens YOLO Inference", version="1.0")
 model = YOLO(MODEL_PATH)
 s3 = boto3.client("s3", region_name=REGION)
 
@@ -237,14 +237,14 @@ curl http://localhost:8000/health
 > [!IMPORTANT]
 > For production reliability, set up a systemd service:
 > ```bash
-> sudo tee /etc/systemd/system/civicai-yolo.service << EOF
+> sudo tee /etc/systemd/system/CivicLens-yolo.service << EOF
 > [Unit]
-> Description=CivicAI YOLO Inference Server
+> Description=CivicLens YOLO Inference Server
 > After=network.target
 > 
 > [Service]
 > User=ec2-user
-> WorkingDirectory=/home/ec2-user/civicai
+> WorkingDirectory=/home/ec2-user/CivicLens
 > ExecStart=/usr/bin/python3 predict_server.py
 > Restart=always
 > 
@@ -252,8 +252,8 @@ curl http://localhost:8000/health
 > WantedBy=multi-user.target
 > EOF
 >
-> sudo systemctl enable civicai-yolo
-> sudo systemctl start civicai-yolo
+> sudo systemctl enable CivicLens-yolo
+> sudo systemctl start CivicLens-yolo
 > ```
 
 ---
@@ -264,7 +264,7 @@ curl http://localhost:8000/health
 
    | Setting | Value |
    |---|---|
-   | Bucket name | `civicai-images` |
+   | Bucket name | `CivicLens-images` |
    | Region | `ap-south-1` |
    | Block all public access | ✅ Keep enabled |
 
@@ -272,7 +272,7 @@ curl http://localhost:8000/health
 
 ### 2.1 — Add CORS Configuration
 
-1. Go to **civicai-images** → **Permissions** → **CORS configuration** → **Edit**
+1. Go to **CivicLens-images** → **Permissions** → **CORS configuration** → **Edit**
 2. Paste:
 
 ```json
@@ -336,11 +336,11 @@ curl http://localhost:8000/health
 
 ## Step 6: Create IAM Roles
 
-### Role A — `civicai-lambda-upload-role` (for Lambda 1)
+### Role A — `CivicLens-lambda-upload-role` (for Lambda 1)
 
 1. **IAM** → **Roles** → **Create role** → AWS service → **Lambda** → Next
 2. Attach: `AWSLambdaBasicExecutionRole` → Next
-3. Name: `civicai-lambda-upload-role` → **Create role**
+3. Name: `CivicLens-lambda-upload-role` → **Create role**
 4. Click the role → **Add permissions** → **Create inline policy** → **JSON**:
 
 ```json
@@ -350,21 +350,21 @@ curl http://localhost:8000/health
         {
             "Effect": "Allow",
             "Action": ["s3:PutObject", "s3:GetObject"],
-            "Resource": "arn:aws:s3:::civicai-images/*"
+            "Resource": "arn:aws:s3:::CivicLens-images/*"
         }
     ]
 }
 ```
 
-5. Name: `civicai-s3-upload-policy` → **Create policy**
+5. Name: `CivicLens-s3-upload-policy` → **Create policy**
 
 ---
 
-### Role B — `civicai-lambda-process-role` (for Lambda 2)
+### Role B — `CivicLens-lambda-process-role` (for Lambda 2)
 
 1. **IAM** → **Roles** → **Create role** → AWS service → **Lambda** → Next
 2. Attach: `AWSLambdaBasicExecutionRole` → Next
-3. Name: `civicai-lambda-process-role` → **Create role**
+3. Name: `CivicLens-lambda-process-role` → **Create role**
 4. Click the role → **Add permissions** → **Create inline policy** → **JSON**:
 
 ```json
@@ -375,7 +375,7 @@ curl http://localhost:8000/health
             "Sid": "S3Read",
             "Effect": "Allow",
             "Action": ["s3:GetObject"],
-            "Resource": "arn:aws:s3:::civicai-images/*"
+            "Resource": "arn:aws:s3:::CivicLens-images/*"
         },
         {
             "Sid": "DynamoDB",
@@ -399,7 +399,7 @@ curl http://localhost:8000/health
 }
 ```
 
-5. Name: `civicai-process-policy` → **Create policy**
+5. Name: `CivicLens-process-policy` → **Create policy**
 
 ---
 
@@ -411,10 +411,10 @@ curl http://localhost:8000/health
 
    | Setting | Value |
    |---|---|
-   | Function name | `civicai-generate-upload-url` |
+   | Function name | `CivicLens-generate-upload-url` |
    | Runtime | Python 3.12 |
    | Architecture | x86_64 |
-   | Execution role | Use existing → `civicai-lambda-upload-role` |
+   | Execution role | Use existing → `CivicLens-lambda-upload-role` |
 
 2. Click **Create function**
 
@@ -432,7 +432,7 @@ curl http://localhost:8000/health
 
 | Key | Value |
 |---|---|
-| `BUCKET_NAME` | `civicai-images` |
+| `BUCKET_NAME` | `CivicLens-images` |
 | `REGION` | `ap-south-1` |
 | `URL_EXPIRY` | `300` |
 
@@ -452,10 +452,10 @@ curl http://localhost:8000/health
 
    | Setting | Value |
    |---|---|
-   | Function name | `civicai-process-image` |
+   | Function name | `CivicLens-process-image` |
    | Runtime | Python 3.12 |
    | Architecture | x86_64 |
-   | Execution role | Use existing → `civicai-lambda-process-role` |
+   | Execution role | Use existing → `CivicLens-lambda-process-role` |
 
 2. Click **Create function**
 
@@ -499,7 +499,7 @@ The `inference_client.py` uses the `requests` library which isn't in the Lambda 
 | `MODEL_ID` | `anthropic.claude-v2` |
 | `SES_SOURCE_EMAIL` | `your-verified-email@gmail.com` |
 | `REGION` | `ap-south-1` |
-| `BUCKET_NAME` | `civicai-images` |
+| `BUCKET_NAME` | `CivicLens-images` |
 | `YOLO_TIMEOUT` | `10` |
 
 > [!CAUTION]
@@ -513,7 +513,7 @@ The `inference_client.py` uses the `requests` library which isn't in the Lambda 
 
 ### 8.6 — Add S3 Event Trigger
 
-1. Go to **S3** → **civicai-images** → **Properties** tab
+1. Go to **S3** → **CivicLens-images** → **Properties** tab
 2. Scroll to **Event notifications** → **Create event notification**
 
    | Setting | Value |
@@ -522,7 +522,7 @@ The `inference_client.py` uses the `requests` library which isn't in the Lambda 
    | Prefix | `complaints/` |
    | Event types | ✅ `s3:ObjectCreated:Put` |
    | Destination | **Lambda function** |
-   | Lambda function | `civicai-process-image` |
+   | Lambda function | `CivicLens-process-image` |
 
 3. Click **Save changes**
 
@@ -536,7 +536,7 @@ The `inference_client.py` uses the `requests` library which isn't in the Lambda 
 
    | Setting | Value |
    |---|---|
-   | API name | `CivicAI-API` |
+   | API name | `CivicLens-API` |
    | Endpoint type | Regional |
 
 2. Click **Create API**
@@ -549,7 +549,7 @@ The `inference_client.py` uses the `requests` library which isn't in the Lambda 
    - Method: **POST**
    - Integration type: **Lambda Function**
    - ✅ **Lambda Proxy Integration**
-   - Lambda function: `civicai-generate-upload-url`
+   - Lambda function: `CivicLens-generate-upload-url`
    - Click **Create Method**
 
 ### 9.3 — Enable CORS
@@ -576,7 +576,7 @@ The `inference_client.py` uses the `requests` library which isn't in the Lambda 
 
 ### 10.1 — Update `.env`
 
-Edit `civicai-frontend/.env`:
+Edit `CivicLens-frontend/.env`:
 
 ```env
 VITE_API_BASE_URL=https://xxxxxxxxxx.execute-api.ap-south-1.amazonaws.com/prod
@@ -615,7 +615,7 @@ Expected:
 ```json
 {
     "incident_id": "uuid-string",
-    "upload_url": "https://civicai-images.s3.amazonaws.com/...",
+    "upload_url": "https://CivicLens-images.s3.amazonaws.com/...",
     "s3_key": "complaints/uuid-string.jpg"
 }
 ```
@@ -630,7 +630,7 @@ curl -X PUT "<upload_url>" \
 ```
 
 Then verify:
-1. **CloudWatch** → Log groups → `/aws/lambda/civicai-process-image` → check logs
+1. **CloudWatch** → Log groups → `/aws/lambda/CivicLens-process-image` → check logs
 2. **DynamoDB** → `Complaints` table → **Explore items** → record should appear
 3. **Email inbox** → notification email should arrive
 
@@ -648,11 +648,11 @@ Then verify:
 
 | Service | Variable | Value |
 |---|---|---|
-| Lambda 1 | `BUCKET_NAME` | `civicai-images` |
+| Lambda 1 | `BUCKET_NAME` | `CivicLens-images` |
 | Lambda 1 | `REGION` | `ap-south-1` |
 | Lambda 1 | `URL_EXPIRY` | `300` |
 | Lambda 2 | `TABLE_NAME` | `Complaints` |
-| Lambda 2 | `BUCKET_NAME` | `civicai-images` |
+| Lambda 2 | `BUCKET_NAME` | `CivicLens-images` |
 | Lambda 2 | `EC2_ENDPOINT` | `http://<ELASTIC_IP>:8000/predict` |
 | Lambda 2 | `MODEL_ID` | `anthropic.claude-haiku-4-5-v1` |
 | Lambda 2 | `SES_SOURCE_EMAIL` | `your-verified@gmail.com` |
@@ -690,7 +690,7 @@ Host the React frontend on S3 with CloudFront CDN for HTTPS and fast global load
 On your local machine:
 
 ```bash
-cd civicai-frontend
+cd CivicLens-frontend
 npm run build
 ```
 
@@ -703,13 +703,13 @@ This creates a `dist/` folder with the production bundle.
 
    | Setting | Value |
    |---|---|
-   | Bucket name | `civicai-frontend-hosting` |
+   | Bucket name | `CivicLens-frontend-hosting` |
    | Region | `ap-south-1` |
    | Block all public access | ❌ **Uncheck** "Block all public access" |
    | Acknowledge | ✅ Check the warning acknowledgment |
 
 3. Click **Create bucket**
-4. Go to **civicai-frontend-hosting** → **Properties** tab
+4. Go to **CivicLens-frontend-hosting** → **Properties** tab
 5. Scroll to **Static website hosting** → **Edit** → **Enable**
    - Index document: `index.html`
    - Error document: `index.html` (for React Router)
@@ -729,7 +729,7 @@ This creates a `dist/` folder with the production bundle.
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::civicai-frontend-hosting/*"
+            "Resource": "arn:aws:s3:::CivicLens-frontend-hosting/*"
         }
     ]
 }
@@ -739,13 +739,13 @@ This creates a `dist/` folder with the production bundle.
 
 ### Step 4 — Upload Build Files
 
-1. Go to **civicai-frontend-hosting** → **Objects** tab → **Upload**
+1. Go to **CivicLens-frontend-hosting** → **Objects** tab → **Upload**
 2. Click **Add files** and **Add folder**
 3. Upload **all contents** of the `dist/` folder (not the folder itself)
 4. Click **Upload**
 
 > [!TIP]
-> Or use the AWS CLI: `aws s3 sync dist/ s3://civicai-frontend-hosting --delete`
+> Or use the AWS CLI: `aws s3 sync dist/ s3://CivicLens-frontend-hosting --delete`
 
 ### Step 5 — Create CloudFront Distribution
 
@@ -754,7 +754,7 @@ This creates a `dist/` folder with the production bundle.
 
    | Setting | Value |
    |---|---|
-   | Origin domain | Select `civicai-frontend-hosting.s3.ap-south-1.amazonaws.com` |
+   | Origin domain | Select `CivicLens-frontend-hosting.s3.ap-south-1.amazonaws.com` |
    | Origin access | Public |
    | Viewer protocol policy | **Redirect HTTP to HTTPS** |
    | Cache policy | `CachingOptimized` |

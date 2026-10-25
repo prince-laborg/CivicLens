@@ -2,7 +2,7 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/120px-Emblem_of_India.svg.png" alt="Emblem of India" width="80" />
 </p>
 
-<h1 align="center">CivicAI — Smart Municipal Complaint System</h1>
+<h1 align="center">CivicLens — Smart Municipal Complaint System</h1>
 
 <p align="center">
   <strong>AI-Powered Civic Engagement Platform</strong><br/>
@@ -20,7 +20,7 @@
 
 ## Overview
 
-CivicAI is a fully serverless platform that enables citizens to report civic issues (potholes, garbage, broken streetlights, waterlogging) by simply uploading a photo. The system uses a custom-trained **YOLOv8** computer vision model and **Amazon Bedrock (Claude)** to automatically:
+CivicLens is a fully serverless platform that enables citizens to report civic issues (potholes, garbage, broken streetlights, waterlogging) by simply uploading a photo. The system uses a custom-trained **YOLOv8** computer vision model and **Amazon Bedrock (Claude)** to automatically:
 
 1. **Detect** the issue type with 90%+ accuracy
 2. **Assess** severity using rule-based logic
@@ -134,7 +134,7 @@ Citizens authenticate via OTP (SMS) and can track their complaints in real-time.
 ## Project Structure
 
 ```
-civicai-frontend/
+CivicLens-frontend/
 │
 ├── src/                          # Frontend source code
 │   ├── components/
@@ -197,8 +197,8 @@ civicai-frontend/
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/CivicAI.git
-cd civicai-frontend
+git clone https://github.com/YOUR-USERNAME/CivicLens.git
+cd CivicLens-frontend
 npm install
 ```
 
@@ -229,7 +229,7 @@ Upload the `dist/` folder to your S3 bucket and create a CloudFront invalidation
 
 ### 5. Amazon Pinpoint (SMS OTP) Configuration
 
-CivicAI uses Amazon Pinpoint/SNS for phone authentication. Ensure your AWS account is out of the **SMS Sandbox**.
+CivicLens uses Amazon Pinpoint/SNS for phone authentication. Ensure your AWS account is out of the **SMS Sandbox**.
 
 1. Navigate to the **Amazon Pinpoint Console** in `ap-south-1`.
 2. Access **SMS and voice** settings.
@@ -274,5 +274,5 @@ MIT License
 ---
 
 <p align="center">
-  <strong>CivicAI</strong> — Making Indian cities smarter, one photo at a time.
+  <strong>CivicLens</strong> — Making Indian cities smarter, one photo at a time.
 </p>

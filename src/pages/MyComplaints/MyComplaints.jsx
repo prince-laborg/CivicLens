@@ -10,7 +10,7 @@ const MyComplaints = () => {
     const [filter, setFilter] = useState('all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     useEffect(() => {
-        const savedUser = JSON.parse(localStorage.getItem('civicai_user') || '{}');
+        const savedUser = JSON.parse(localStorage.getItem('CivicLens_user') || '{}');
         const f = {};
         if (filter !== 'all') f.status = filter;
         if (categoryFilter !== 'all') f.category = categoryFilter;

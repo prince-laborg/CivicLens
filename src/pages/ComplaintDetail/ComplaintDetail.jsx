@@ -10,7 +10,7 @@ const ComplaintDetail = () => {
     const [loading, setLoading] = useState(true);
     const [updatingStatus, setUpdatingStatus] = useState(false);
 
-    const user = JSON.parse(localStorage.getItem('civicai_user') || '{}');
+    const user = JSON.parse(localStorage.getItem('CivicLens_user') || '{}');
     const canUpdateStatus = user.role === 'admin' || user.role === 'worker';
     const backLink = canUpdateStatus ? '/complaints' : '/my-complaints';
 
@@ -30,7 +30,7 @@ const ComplaintDetail = () => {
     const c = complaint;
     const confidenceVal = parseFloat(c.confidence) || 0;
     const imageUrl = c.s3_key
-        ? `https://civicai-images.s3.ap-south-1.amazonaws.com/${c.s3_key}`
+        ? `https://CivicLens-images.s3.ap-south-1.amazonaws.com/${c.s3_key}`
         : null;
 
     const handleUpvote = async () => {

@@ -1,5 +1,5 @@
 """
-lambda_function.py — Authentication backend for CivicAI (OTP Flow)
+lambda_function.py — Authentication backend for CivicLens (OTP Flow)
 
 Routes:
 - POST /auth/send-otp
@@ -28,7 +28,7 @@ logger.setLevel(logging.INFO)
 REGION = os.environ.get('REGION', 'ap-south-1')
 TABLE_NAME = os.environ.get('TABLE_NAME', 'Users')
 # Secret key for rudimentary JWT signing
-SECRET_KEY = os.environ.get('JWT_SECRET', 'civicai-super-secret-key').encode('utf-8')
+SECRET_KEY = os.environ.get('JWT_SECRET', 'CivicLens-super-secret-key').encode('utf-8')
 
 dynamodb = boto3.resource('dynamodb', region_name=REGION)
 sns_client = boto3.client('sns', region_name=REGION)
@@ -90,7 +90,7 @@ def handle_send_otp(body):
         # We also generate a fallback response for local UI testing if SNS Sandbox restricts sending
         sns_client.publish(
             PhoneNumber=phone,
-            Message=f"Your CivicAI verification code is: {otp}. It expires in 5 minutes.",
+            Message=f"Your CivicLens verification code is: {otp}. It expires in 5 minutes.",
             MessageAttributes={
                 'AWS.SNS.SMS.SMSType': {
                     'DataType': 'String',

@@ -14,15 +14,15 @@ import Worker from './pages/Worker/Worker';
 import Login from './pages/Login/Login';
 function App() {
     const [user, setUser] = useState(() => {
-        const saved = localStorage.getItem('civicai_user');
+        const saved = localStorage.getItem('CivicLens_user');
         return saved ? JSON.parse(saved) : null;
     });
     const handleLogin = (userData) => {
         setUser(userData);
     };
     const handleLogout = () => {
-        localStorage.removeItem('civicai_user');
-        localStorage.removeItem('civicai_token');
+        localStorage.removeItem('CivicLens_user');
+        localStorage.removeItem('CivicLens_token');
         setUser(null);
         window.location.href = '/';
     };
@@ -48,7 +48,7 @@ function App() {
                         <div className="container footer-inner">
                             <div className="footer-brand">
                                 <Landmark size={16} />
-                                <span>CivicAI</span>
+                                <span>CivicLens</span>
                                 <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— Smart Municipal Complaint System</span>
                             </div>
                             <div className="footer-links">
@@ -76,7 +76,7 @@ function App() {
                         <div className="container footer-inner">
                             <div className="footer-brand">
                                 <Landmark size={16} />
-                                <span>CivicAI</span>
+                                <span>CivicLens</span>
                                 <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— Smart Municipal Complaint System</span>
                             </div>
                             <div className="footer-links">

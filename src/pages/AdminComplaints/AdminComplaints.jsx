@@ -137,7 +137,7 @@ const AdminComplaints = () => {
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `civicai_complaints_${new Date().toISOString().split('T')[0]}.csv`;
+        link.download = `CivicLens_complaints_${new Date().toISOString().split('T')[0]}.csv`;
         link.click();
     };
 

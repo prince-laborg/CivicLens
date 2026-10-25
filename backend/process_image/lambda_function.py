@@ -1,5 +1,5 @@
 """
-lambda_function.py — Main handler for CivicAI process_image Lambda.
+lambda_function.py — Main handler for CivicLens process_image Lambda.
 
 Triggered by an S3 ObjectCreated event. Orchestrates:
     1. Extract S3 event metadata (bucket, key, incident_id)
@@ -96,7 +96,7 @@ def send_email_notification(
         f"══════════════════════════════════════\n\n"
         f"Description:\n{complaint_text}\n\n"
         f"Please take appropriate action.\n"
-        f"— CivicAI Automated System"
+        f"— CivicLens Automated System"
     )
 
     try:
